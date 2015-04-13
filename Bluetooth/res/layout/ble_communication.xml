@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.9"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/tv_devName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/header"
+            android:gravity="center"
+            android:text="DeviceName"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/tv_receiveData"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="left|top"
+            android:inputType="textMultiLine"
+            android:text="欢迎使用蓝牙串口调试助手（for android4.3 bluetooth4.0）"
+            android:textSize="15dp" >
+
+            <requestFocus android:layout_width="match_parent" />
+        </TextView>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="3dp"
+        android:background="@drawable/line" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_weight="0.01"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/et_writeContent"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.7"
+            android:focusableInTouchMode="true"
+            android:hint="请输入内容" />
+
+        <Button
+            android:id="@+id/btn_sendMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.3"
+            android:text="发送" />
+    </LinearLayout>
+
+</LinearLayout>
