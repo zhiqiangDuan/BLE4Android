@@ -49,6 +49,10 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 	TextView tv_devName, tv_receiveData;
 	EditText et_writeContent;
 	Button btn_sendMsg;
+	//===================
+	boolean isRecved = false;
+	boolean shakeHand = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,7 +63,6 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 
 	@SuppressLint("HandlerLeak")
 	private Handler catHandler = new Handler() {
-
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
@@ -96,7 +99,6 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 	 * 该BroadcastReceiver主要是接受BluetoothLEService发送过来的广播消息。
 	 * 然后获取BluetoothLEService传送过来的数据进行显示。
 	 * */
-
 	private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -120,17 +122,16 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 				// displayGattServices(mBluetoothLeService
 				// .getSupportedGattServices());
 			} else if (BluetoothLEService.ACTION_DATA_AVAILABLE.equals(action)) {   //收到 数据的消息
-				Bundle extras = intent.getExtras();
-				String data = extras.getString(BluetoothLEService.EXTRA_DATA);
-				byte[] buf = data.getBytes();
-				//for(int i = 0;i < buf.length;i++)
-			//	{
-					//System.out.println(buf[i]);
-				//	tv_receiveData.setText(buf[i]+ " ");
-			//	}
-				//tv_receiveData.setText("111");
-				//tv_receiveData.setText("\n");
-				tv_receiveData.setText(tv_receiveData.getText().toString() +"data!\n"+ buf[0]+ buf[1]+ buf[2]+ buf[3]);
+				if(shakeHand == true)
+				{
+					btn_sendMsg.setClickable(true);
+					shakeHand = false;
+					Bundle extras = intent.getExtras();
+					String data = extras.getString(BluetoothLEService.EXTRA_DATA);
+					byte[] buf = data.getBytes();
+					tv_receiveData.setText(tv_receiveData.getText().toString()+ buf[0]+ buf[1]+ buf[2]+ buf[3]);
+				}
+				
 			}
 		}
 	};
@@ -153,6 +154,9 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 		btn_sendMsg = (Button) findViewById(R.id.btn_sendMsg);
 		tv_devName.setText(bleDevName);
 		btn_sendMsg.setOnClickListener(this);
+		/*
+		 * 后面的才是重点。前面的都是设置UI，没有什么重点。重点是后面的服务
+		 */
 		Intent intent = new Intent(this, BluetoothLEService.class);
 		bindService(intent, conn, BIND_AUTO_CREATE);
 		CatConResult result = new CatConResult();
@@ -164,7 +168,7 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 	
 	
 	/*
-	 * 该函数实现了一个两秒的定时器，用于定时检车蓝牙的连接状态
+	 * 该函数实现了一个两秒的定时器，用于定时检测蓝牙的连接状态
 	 * 如果蓝牙断开连接。那么就会重新连接蓝牙
 	 * 重连之后需要修改的数据就在这里修改。
 	 * */
@@ -309,8 +313,10 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 	}
 
 	@Override
-	public void onClick(View v) {
-		String sendStr = this.toStringHex(et_writeContent.getText().toString()); // 发送HEX
+	public void onClick(View v) {  //点击发送按钮，发送数据
+		shakeHand = true;
+		//String sendStr = this.toStringHex(et_writeContent.getText().toString()); // 发送HEX
+		String sendStr = this.toStringHex("55020057"); // 发送握手信号
 		if (characteristics == null) {
 			Toast.makeText(this, "bluetooth初始化没有成功，请重新进入此界面进行初始化！Sorry，^-^",
 					Toast.LENGTH_SHORT).show();
@@ -322,7 +328,10 @@ public class DeviceControlActivity extends Activity implements OnClickListener {
 						.writeCharacteristic(characteristic, sendStr);
 			}
 		}
+		btn_sendMsg.setClickable(false);
+		
 	}
+	
 	public String toStringHex(String s) 
 	{ 
 		byte[] baKeyword = new byte[s.length()/2]; 

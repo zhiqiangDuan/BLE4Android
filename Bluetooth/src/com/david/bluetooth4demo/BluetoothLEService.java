@@ -95,14 +95,10 @@ public class BluetoothLEService extends Service {
 					+ ", descriptor =" + descriptor.getUuid().toString());
 		}
 		@Override
-		public void onCharacteristicChanged(BluetoothGatt gatt, //data coming.....
+		//===================================收到数据！！==========================
+		public void onCharacteristicChanged(BluetoothGatt gatt, 
 				BluetoothGattCharacteristic characteristic) {
 			broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-			if (characteristic.getValue() != null) {
-
-				System.out.println(characteristic.getStringValue(0));
-			}
-			System.out.println("--------onCharacteristicChanged-----");
 		}
 
 		@Override
@@ -161,6 +157,7 @@ public class BluetoothLEService extends Service {
 		sendBroadcast(intent);
 	}
 
+	
 	public boolean initBluetoothParam() {
 		if (mBluetoothManager == null) {
 			mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);

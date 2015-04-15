@@ -1,61 +1,107 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    android:orientation="vertical"
-    tools:context=".MainActivity" >
-
+    android:background="@drawable/background" >
     <TextView
+        android:id="@+id/textView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/header"
+        android:layout_centerVertical="true"
+        android:text="欢迎使用睿驰控制器。本程序用于睿驰控制器的参数和功能调试以及电机匹配工作。正式上路骑行请遵守国家有关规范，本公司不承担法律责任。" />
+    
+    <Button
+        android:id="@+id/serial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above = "@+id/layoutInfo"
+        android:layout_centerHorizontal="true"
         android:gravity="center"
-        android:hint="Bluetooth4.0-Android4.3" />
+        android:text="睿驰系列控制器"
+        android:textColor="@android:color/white"
+        android:textSize="22sp" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:id="@+id/layoutInfo"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <ToggleButton
-            android:id="@+id/tb_on_off"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:textOff="Bluetooth-off"
-            android:textOn="Bluetooth-on" />
-
-        <Button
-            android:id="@+id/btn_searchDev"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="Search-device" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="28dp"
+        android:orientation="vertical" >
+        <LinearLayout
+	        android:id="@+id/layoutQQ"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	        <TextView
+		        android:id="@+id/textViewQQ"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="客服电话"
+		        android:textSize="22sp" />
+	        <TextView
+		        android:id="@+id/textViewQQ2"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="32425435435" 
+		        android:textSize="22sp"/>
+        </LinearLayout>
+               <LinearLayout
+	        android:id="@+id/layoutQQ"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	        <TextView
+		        android:id="@+id/textViewQQ"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="QQ"
+		        android:textSize="22sp"/>
+	        <TextView
+		        android:id="@+id/textViewQQ2"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="32425435435"
+		        android:textSize="22sp"/>
+        </LinearLayout>
+        <LinearLayout
+	        android:id="@+id/layoutQQ"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	        <TextView
+		        android:id="@+id/textViewQQ"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="微信"
+		        android:textSize="22sp"/>
+	        <TextView
+		        android:id="@+id/textViewQQ2"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="32425435435"
+		        android:textSize="22sp"/>
+        </LinearLayout>
+        <LinearLayout
+	        android:id="@+id/layoutQQ"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	        <TextView
+		        android:id="@+id/textViewQQ"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="淘宝"
+		        android:textSize="22sp"/>
+	        <TextView
+		        android:id="@+id/textViewQQ2"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="www.ruichi.taobao.com"
+		        android:textSize="22sp"/>
+        </LinearLayout>
+        
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/btn_aboutUs"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="AboutUs" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/header"
-        android:gravity="center"
-        android:hint="Bluetooth-Device-List" />
-
-    <ListView
-        android:id="@+id/lv_bleList"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
-</LinearLayout>
+</RelativeLayout>
