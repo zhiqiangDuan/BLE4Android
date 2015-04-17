@@ -57,7 +57,8 @@ public class SetUp extends Activity implements OnClickListener, OnGestureListene
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);		mHandler = new Handler();  //  定时检测蓝牙是佛连接。
+		setContentView(R.layout.activity_main);	
+		mHandler = new Handler();  //  定时检测蓝牙是佛连接。
 		/*
 		 * 开机需要做四件事
 		 * 1  判断此设备是否支持4.0设备
@@ -156,9 +157,7 @@ public class SetUp extends Activity implements OnClickListener, OnGestureListene
 				}
 			}
 		});
-
 	}
-
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {

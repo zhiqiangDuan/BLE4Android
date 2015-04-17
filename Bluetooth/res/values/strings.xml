@@ -5,4 +5,5 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
 	<string name="ble_not_supported">设备不支持蓝牙设备！</string>
+	<string name="txtCredits"><a href="http://www.taobao.com">睿驰官方淘宝店</a></string>
 </resources>

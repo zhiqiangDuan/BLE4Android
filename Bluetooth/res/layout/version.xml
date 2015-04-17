@@ -5,9 +5,15 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/backView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="占个坑！！" />
+
+    <Button
+        android:id="@+id/shake"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="握手" />
 
 </LinearLayout>

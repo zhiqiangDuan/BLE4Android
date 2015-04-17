@@ -9,6 +9,10 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:text="欢迎使用睿驰控制器。本程序用于睿驰控制器的参数和功能调试以及电机匹配工作。正式上路骑行请遵守国家有关规范，本公司不承担法律责任。" />
+      <ListView
+        android:id="@+id/lv_bleList"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
     
     <Button
         android:id="@+id/serial"
@@ -30,18 +34,18 @@
         android:layout_marginLeft="28dp"
         android:orientation="vertical" >
         <LinearLayout
-	        android:id="@+id/layoutQQ"
+	        android:id="@+id/layoutNum"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:orientation="horizontal" >
 	        <TextView
-		        android:id="@+id/textViewQQ"
+		        android:id="@+id/textViewNum"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="客服电话"
 		        android:textSize="22sp" />
 	        <TextView
-		        android:id="@+id/textViewQQ2"
+		        android:id="@+id/textViewNum2"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="32425435435" 
@@ -66,40 +70,43 @@
 		        android:textSize="22sp"/>
         </LinearLayout>
         <LinearLayout
-	        android:id="@+id/layoutQQ"
+	        android:id="@+id/layoutWeixin"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:orientation="horizontal" >
 	        <TextView
-		        android:id="@+id/textViewQQ"
+		        android:id="@+id/textViewWeixin"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="微信"
 		        android:textSize="22sp"/>
 	        <TextView
-		        android:id="@+id/textViewQQ2"
+		        android:id="@+id/textViewWeixin2"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="32425435435"
 		        android:textSize="22sp"/>
         </LinearLayout>
         <LinearLayout
-	        android:id="@+id/layoutQQ"
+	        android:id="@+id/layoutTaobao"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:orientation="horizontal" >
 	        <TextView
-		        android:id="@+id/textViewQQ"
+		        android:id="@+id/textViewTaobao"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:text="淘宝"
 		        android:textSize="22sp"/>
+	        
 	        <TextView
-		        android:id="@+id/textViewQQ2"
+		        android:id="@+id/textViewTaobao2"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
-		        android:text="www.ruichi.taobao.com"
-		        android:textSize="22sp"/>
+		        android:autoLink="web"
+        		android:linksClickable="true"
+        		android:text="@string/txtCredits"
+		        android:textSize="17sp"/>
         </LinearLayout>
         
     </LinearLayout>
