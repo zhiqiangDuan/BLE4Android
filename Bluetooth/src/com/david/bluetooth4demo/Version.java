@@ -1,7 +1,10 @@
 package com.david.bluetooth4demo;
 
+import android.R.integer;
 import android.app.Activity;
 import android.os.Bundle;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,8 +42,6 @@ import android.widget.Toast;
 
 
 public class Version extends Activity implements OnClickListener {
-
-
 	private final static String TAG = DeviceControlActivity.class
 			.getSimpleName();
 	public BluetoothLEService mBluetoothLEService;
@@ -54,9 +55,18 @@ public class Version extends Activity implements OnClickListener {
 	public BluetoothGattCharacteristic mNotifyCharacteristic;
 	private TextView tv_receiveData;
 	private Button btn_sendMsg;
-	//===================
+	private Button butSen;
+	private ProgressBar pBar;
+	//=========标志==========
+	NotifyThread thread;
+	boolean isFirst = true;
 	boolean isRecved = false;
 	boolean shakeHand = false;
+	boolean falg1 = false;
+	boolean islang = false;
+	boolean isRead = false;
+	int count = 0;
+	String tempBuf;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	// TODO Auto-generated method stub
@@ -98,7 +108,6 @@ public class Version extends Activity implements OnClickListener {
 			}
 		}
 	};
-	
 	/*
 	 * 该BroadcastReceiver主要是接受BluetoothLEService发送过来的广播消息。
 	 * 然后获取BluetoothLEService传送过来的数据进行显示。
@@ -125,21 +134,115 @@ public class Version extends Activity implements OnClickListener {
 				// user interface.
 				// displayGattServices(mBluetoothLeService
 				// .getSupportedGattServices());
-			} else if (BluetoothLEService.ACTION_DATA_AVAILABLE.equals(action)) {   //收到 数据的消息
+			}//else if (BluetoothLEService.DATA_CHECKSUM.equals(action)) { // shakehand 握手成功！
+				//shakeHand = true;
+			//}
+			else if (BluetoothLEService.ACTION_DATA_AVAILABLE.equals(action)) {   //收到 数据的消息
+					//btn_sendMsg.setClickable(true);
+				shakeHand = true;
+				falg1 = false;
+				isRecved = true;
+				Bundle extras = intent.getExtras();
+				String data = extras.getString(BluetoothLEService.DATA_4);
+				if("true".equals(data))
+				{
+					System.out.println("true!!!!");
+				}
+				tv_receiveData.setText(tv_receiveData.getText().toString()+data+"buf = "+data.length());
+				//tempBuf = data;
+				//tv_receiveData.setText(tv_receiveData.getText().toString()+tempBuf+"buf = "+tempBuf.length());
+				//hexshow(tempBuf);
+				//数据在长度超过20的时候，返回的数据就会按两条返回
+				byte[] temp;
 				if(shakeHand == true)
 				{
-					btn_sendMsg.setClickable(true);
+					System.out.println("=========");
+					tempBuf = data;
+					try {
+						temp = tempBuf.getBytes("GBK");
+						boolean sum = checkSum(temp);
+						if(sum == false)
+						{
+							tv_receiveData.setText(tv_receiveData.getText().toString()+"Error!");
+							return;
+						}
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					shakeHand = false;
-					Bundle extras = intent.getExtras();
-					String data = extras.getString(BluetoothLEService.EXTRA_DATA);
-					byte[] buf = data.getBytes();
-					tv_receiveData.setText(tv_receiveData.getText().toString()+ buf[0]+ buf[1]+ buf[2]+ buf[3]);
+					System.out.println("shakeHand!!!!  false");
+				}
+				else if(isRead == true)
+				{
+					if(count == 0)
+					{
+						System.out.println("========="+count);
+						tempBuf = data;
+						count = 1;
+						
+					}
+					else if(count == 1){
+						System.out.println("---------"+count);
+						tempBuf+=data;
+						//try {
+							temp = tempBuf.getBytes();
+							boolean sum = checkSum(temp);
+							if(sum == false)
+							{
+								tv_receiveData.setText(tv_receiveData.getText().toString()+"Error!");
+								isRead = false;
+								return;
+							}
+						//} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							//e.printStackTrace();
+						//}
+						isRead = false;
+						tempBuf = null;
+						count = 0;	
+					}
 				}
 				
 			}
 		}
 	};
-
+	private void hexshow(String test)
+	{
+		char[] temp = test.toCharArray();
+		try {
+			byte[] temp2 = test.getBytes("GBK");
+			System.out.println(temp2.length+"=========");
+			for(int i = 0;i < temp2.length;i++)
+			{
+				System.out.print((temp2[i])+" ");
+			}
+			System.out.println("temp2 = "+temp2[temp2.length - 1]+" ");	
+			System.out.println(checkSum(temp2));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	private boolean checkSum(byte[] byt)
+	{
+		int sum = 0;
+		int temp = 0;
+		for(int i = 0;i < byt.length -1;i++)
+		{
+			
+			temp = byt[i];
+			System.out.print(temp+" ");
+				sum+=temp;
+		}
+		int  check = sum & 0xff;
+		System.out.println("sum = "+ (check));
+		if(check == byt[byt.length -1])
+		{
+			return true;
+		}
+		return false;
+	}
 	private static IntentFilter makeGattUpdateIntentFilter() {
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(BluetoothLEService.ACTION_GATT_CONNECTED);
@@ -147,19 +250,22 @@ public class Version extends Activity implements OnClickListener {
 		intentFilter
 				.addAction(BluetoothLEService.ACTION_GATT_SERVICES_DISCOVERED);
 		intentFilter.addAction(BluetoothLEService.ACTION_DATA_AVAILABLE);
+		
 		return intentFilter;
 	}
 	private void init() {
 		mHandler = new Handler();
 		tv_receiveData = (TextView) findViewById(R.id.backView);
 		btn_sendMsg = (Button) findViewById(R.id.shake);
+		butSen = (Button)findViewById(R.id.buttonSend);
+		pBar = (ProgressBar)findViewById(R.id.progressBar1);
 		btn_sendMsg.setOnClickListener(this);
-		/*
-		 * 后面的才是重点。前面的都是设置UI，没有什么重点。重点是后面的服务
-		 */
+		butSen.setOnClickListener(this);
+		thread = new NotifyThread();
 		Intent intent = new Intent(this, BluetoothLEService.class);
 		bindService(intent, conn, BIND_AUTO_CREATE);
 		CatConResult result = new CatConResult();
+		
 		result.start();
 
 	}
@@ -174,50 +280,101 @@ public class Version extends Activity implements OnClickListener {
 	 * */
 	protected void onResume() {
 		super.onResume();
-		registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
 		progressDialog = ProgressDialog.show(this, "Connect-bluetooth4.0",
 				"Connecting devivce...");
+		registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				if (mBluetoothLEService != null) {
 					connect = mBluetoothLEService.connect(bLEDevAddress);
-					System.out.println("resume!!"+connect);
 					if (connect) {
-						NotifyThread thread = new NotifyThread();
-						thread.execute();
+						characteristics = getCharacteristic();
+						//setNotifyReceive(characteristics);
+						//thread.execute();
+						NotifyThread nt = new NotifyThread();
+						nt.execute();
 					}
 				}
 			}
 		}, 2000);
+		
 	}
-
 	class NotifyThread extends AsyncTask<String, String, String> {
 
 		@Override
 		protected String doInBackground(String... params) {
 			try {
-				Thread.sleep(2000);
-				characteristics = getCharacteristic();
-				System.out.print(characteristics);
-				setNotifyReceive(characteristics);
+					Thread.sleep(2000);
+					characteristics = getCharacteristic();
+					setNotifyReceive(characteristics);
+				//WriteThread thread = new WriteThread();
+				//thread.execute();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			return null;
 		}
-
 		@Override
 		protected void onPostExecute(String result) {
 			if (connect) {
 				Log.e("successful", "connectting success");
+				pBar.setProgress(10);
 				progressDialog.dismiss();
 			}
 			super.onPostExecute(result);
 		}
 
 	}
-
+	class WriteThread extends AsyncTask<String, String, String>
+	{
+		@Override
+		protected String doInBackground(String... arg0) {
+			// TODO Auto-generated method stub
+			//writeBlue(0);// 握手
+			//shakeHand = true;
+			//System.out.println("shakeHand = "+ shakeHand);
+			//while(shakeHand == true);
+			int count = 0;
+			writeBlue(1); 
+			// 循环读 1S。如果1秒还没有收到数据，提示
+			System.out.println("waiting.....");
+			while(shakeHand == false )
+			{
+				if(count < 20)
+				{
+					count++;
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+				}
+				else {
+					//超时！
+					return "timeout!";
+				}
+			}
+			shakeHand = false;  
+			//读到数据
+			//==========接下来的命令！也都是阻塞读取=========
+			return "checksum";
+		}
+		@Override
+		protected void onPostExecute(String result) {
+			this.cancel(true);
+			if(!("timeout".equals(result)))
+			{
+				tv_receiveData.setText(tv_receiveData.getText().toString()+ "timeout");
+			}
+			else if(!("checksum".equals(result)))
+			{
+				tv_receiveData.setText(tv_receiveData.getText().toString()+ "校验成功");
+			}
+			super.onPostExecute(result);
+		}
+	}
 	public void setNotifyReceive(
 			ArrayList<BluetoothGattCharacteristic> characteristics) {
 		if (characteristics != null && characteristics.size() > 0) {
@@ -243,7 +400,6 @@ public class Version extends Activity implements OnClickListener {
 			}
 		}
 	}
-
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -285,10 +441,8 @@ public class Version extends Activity implements OnClickListener {
 					isRun = false;
 				}
 			}
-
 		}
 	}
-
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -313,11 +467,57 @@ public class Version extends Activity implements OnClickListener {
 		bLEDevAddress = data.getString("BLEDevAddress");
 	}
 
-	@Override
+	/*
 	public void onClick(View v) {  //点击发送按钮，发送数据
-		shakeHand = true;
+
+		btn_sendMsg.setClickable(false);
+		
+	}*/
+	
+	@Override 
+	public void onClick(View v)
+	{
+		//progressDialog = ProgressDialog.show(this, "Connect-bluetooth4.0",
+		//		"Connecting devivce...");
+		/*
+		if(v.getId() == R.id.shake)
+		{
+			
+			//btn_sendMsg.setEnabled(false);
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if (mBluetoothLEService != null) {
+						connect = mBluetoothLEService.connect(bLEDevAddress);
+						if (connect) {
+							characteristics = getCharacteristic();
+							setNotifyReceive(characteristics);
+							thread.execute();
+						}
+					}
+				}
+			}, 2000);
+		}
+		else {
+			
+		}*/
+		//shakeHand = true;
+		WriteThread wThread = new WriteThread();
+		wThread.execute();
+		//writeBlue(1);
+		
+	}
+	public void writeBlue(int flag)
+	{
+		String sendStr;
+		//shakeHand = true;
 		//String sendStr = this.toStringHex(et_writeContent.getText().toString()); // 发送HEX
-		String sendStr = this.toStringHex("55020057"); // 发送握手信号
+		if(flag == 1)
+			sendStr = this.toStringHex("5518006d"); // 查询信号
+		else {
+			sendStr = this.toStringHex("55020057"); // 发送握手信号
+		}
+		//String sendStr = this.toStringHex("55020057"); // 发送握手信号
 		if (characteristics == null) {
 			Toast.makeText(this, "bluetooth初始化没有成功，请重新进入此界面进行初始化！Sorry，^-^",
 					Toast.LENGTH_SHORT).show();
@@ -328,11 +528,9 @@ public class Version extends Activity implements OnClickListener {
 				mBluetoothLEService
 						.writeCharacteristic(characteristic, sendStr);
 			}
-		}
-		btn_sendMsg.setClickable(false);
-		
+		}	
+		System.out.println("send!!!");
 	}
-	
 	public String toStringHex(String s) 
 	{ 
 		byte[] baKeyword = new byte[s.length()/2]; 

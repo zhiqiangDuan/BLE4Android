@@ -3,9 +3,11 @@ package com.david.bluetooth4demo;
  * 
  * 该类主要是对蓝牙进行操作的类。到时候可以直接拿来用就行了！！
  * */
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.UUID;
 
+import android.R.integer;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -36,16 +38,25 @@ public class BluetoothLEService extends Service {
 	private static final int STATE_DISCONNECTED = 0;
 	private static final int STATE_CONNECTING = 1;
 	private static final int STATE_CONNECTED = 2;
+	private static final int MESSAGE_DATA_0 = 0;
+	private static final int MESSAGE_DATA_32 = 32;
 
 	public final static String ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
 	public final static String ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
 	public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
 	public final static String ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
 	public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
+	public final static String DATA_4 = "com.example.bluetooth.le.DATA_4";
+	public final static String DATA_32 = "com.example.bluetooth.le.DATA_32";
+	public final static String CHECK_TRUE = "true";
+	public final static String CHECK_FALSE = "false";
 
 	public final static UUID UUID_HEART_RATE_MEASUREMENT = UUID
 			.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
-
+	//当收到的数据长度是36的时候数据会分两次到达，count 判断是数据的头还是数据的尾
+	public int count = 0;
+	public int  isHead =  0; //判断数据是不是数据头
+	public String buf = null;
 	// Various callback methods defined by the BLE API.
 	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
 		@Override
@@ -67,7 +78,6 @@ public class BluetoothLEService extends Service {
 				broadcastUpdate(intentAction);
 			}
 		}
-
 		@Override
 		// New services discovered
 		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
@@ -98,51 +108,75 @@ public class BluetoothLEService extends Service {
 		//===================================收到数据！！==========================
 		public void onCharacteristicChanged(BluetoothGatt gatt, 
 				BluetoothGattCharacteristic characteristic) {
+			//System.out.println("=========");
 			broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 		}
-
 		@Override
 		public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
 			System.out.println("rssi = " + rssi);
-			
-			
 		}
-
 		public void onCharacteristicWrite(BluetoothGatt gatt,
 				BluetoothGattCharacteristic characteristic, int status) {
 			System.out.println("--------write success----- status:" + status);
 
 		};
-
 	};
-
 	private void broadcastUpdate(final String action) {
 		final Intent intent = new Intent(action);
 		sendBroadcast(intent);
 	}
-
 	private void broadcastUpdate(final String action,
 			final BluetoothGattCharacteristic characteristic) {
 		final Intent intent = new Intent(action);
-
-		// This is special handling for the Heart Rate Measurement profile.
-		// Data parsing is carried out as per profile specifications.
 		if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-//			int flag = characteristic.getProperties();
-//			int format = -1;
-//			if ((flag & 0x01) != 0) {
-//				format = BluetoothGattCharacteristic.FORMAT_UINT16;
-//				Log.d(TAG, "Heart rate format UINT16.");
-//			} else {
-//				format = BluetoothGattCharacteristic.FORMAT_UINT8;
-//				Log.d(TAG, "Heart rate format UINT8.");
-//			}
-//			final int heartRate = characteristic.getIntValue(format, 1);
-//			Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-//			intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
 			String value = characteristic.getStringValue(0);
-			intent.putExtra(EXTRA_DATA, value);
-		} else {
+			byte[] hha = characteristic.getValue(); // 如果可以直接获取那我的工作不就白费了！！！
+			//characteristic.
+			//===========check if the data is right===========
+			printStr(value);
+			System.out.println(value.length());
+			if(checkRight(value))
+			{
+				if(isHead == 0)// 如果是数据头，就应该计算数据的长度如果长度是32就继续接受。如果长度是4 就check。
+				{
+					if(checkLength(value) == MESSAGE_DATA_0) //数据的长度是0
+					{
+						if(checkSum(value) == true)  //校验成功
+						{
+							System.out.println("333333");
+								intent.putExtra(DATA_4, CHECK_TRUE);
+								sendBroadcast(intent);
+						}
+					}
+					else {
+						isHead = 1;
+						buf += value;
+					}
+				}
+				else { // 如果不是数据头，那就将这次的数据与上次的数据拼接起来。
+					buf += value;
+					count = 0;
+					if(checkLength(value) == MESSAGE_DATA_32) //数据的长度是0
+					{
+						if(checkSum(value) == true)  //校验成功
+						{
+								System.out.println("32!!!");
+								intent.putExtra(DATA_32, CHECK_TRUE);
+								sendBroadcast(intent);
+						}
+					}
+				}
+				if(checkSum(value) == true)
+					if(checkLength(value) == MESSAGE_DATA_0)
+					{
+						intent.putExtra(DATA_4, CHECK_TRUE);
+						sendBroadcast(intent);
+					}
+				
+				
+			} 
+		}
+		else {
 			// For all other profiles, writes the data formatted in HEX.
 			final byte[] data = characteristic.getValue();
 			if (data != null && data.length > 0) {
@@ -154,10 +188,7 @@ public class BluetoothLEService extends Service {
 						+ stringBuilder.toString());
 			}
 		}
-		sendBroadcast(intent);
 	}
-
-	
 	public boolean initBluetoothParam() {
 		if (mBluetoothManager == null) {
 			mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -292,5 +323,73 @@ public class BluetoothLEService extends Service {
 	// if(mBluetoothGatt==null) return;
 	// mBluetoothGatt.;
 	// }
-
+	public boolean checkRight(String str)
+	{
+		byte[] temp = str.getBytes();
+		int len = temp.length;
+		int sum = 0;
+		for(int i = 0;i < len-1;i++)
+		{
+			sum += (int)temp[i] & 0xff;
+		}
+		if(sum == 0)
+		{
+			return false; // 不是正常数据
+		}
+		return true; // 正常数据
+	}
+	public int  checkLength(String input)
+	{
+		byte[] temp = input.getBytes();
+		if((((int)temp[0]&0xff) == 0x55) && (((int)temp[2]&0xff) == 0) && (temp.length == 4))
+		{
+			return MESSAGE_DATA_0;
+		}
+		return MESSAGE_DATA_32;
+		
+	}
+	public  boolean checkSum(String data)
+	{
+		int sum = 0;
+		byte[] input = data.getBytes();
+		int len = input.length;
+		for(int i = 0;i < len-1;i++)
+		{
+			sum += (int)input[i] & 0xff;
+		}
+		if((sum & 0xff) == input[input.length - 1])
+		{
+			return true;
+		}
+		return false;
+	}
+	public void printStr(String str)
+	{
+		byte[] temp  = null;
+		char[] temp2 = null;
+		int ci = 0;
+		for(int i = 0;i< str.length();i++)
+		{
+			//temp2[i] = str.charAt(i);
+			ci = (int)str.charAt(i) & 0xff;
+			System.out.print(ci+"+");
+		}
+		System.out.println("|");
+		int i = 0;
+		try {
+			temp = str.getBytes("gbk");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(str.length()+"====="+temp.length+"=====================");
+		for(byte a : temp)
+		{
+			i = a;
+			System.out.print(a+ "-");
+			System.out.format( "%x ", ((int)a & 0xff) );
+		}
+		System.out.println(" ");
+		
+	}
 }

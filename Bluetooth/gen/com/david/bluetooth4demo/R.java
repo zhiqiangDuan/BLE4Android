@@ -59,8 +59,8 @@ public final class R {
     public static final class id {
         public static final int LinearLayout1=0x7f090003;
         public static final int LinearLayout2=0x7f090008;
-        public static final int action_settings=0x7f09002a;
-        public static final int backView=0x7f090028;
+        public static final int action_settings=0x7f09002c;
+        public static final int backView=0x7f090029;
         public static final int btn_aboutUs=0x7f090027;
         public static final int btn_searchDev=0x7f090026;
         public static final int btn_sendMsg=0x7f090020;
@@ -74,6 +74,7 @@ public final class R {
         public static final int butpasswd=0x7f090009;
         public static final int button1=0x7f090023;
         public static final int button2=0x7f090024;
+        public static final int buttonSend=0x7f09002b;
         public static final int datalist=0x7f090002;
         public static final int editText1=0x7f090022;
         public static final int et_writeContent=0x7f09001f;
@@ -85,8 +86,9 @@ public final class R {
         public static final int layoutWeixin=0x7f090017;
         public static final int lv_bleList=0x7f09000e;
         public static final int mainLayout=0x7f090000;
+        public static final int progressBar1=0x7f090028;
         public static final int serial=0x7f09000f;
-        public static final int shake=0x7f090029;
+        public static final int shake=0x7f09002a;
         public static final int tb_on_off=0x7f090025;
         public static final int textView1=0x7f09000d;
         public static final int textViewNum=0x7f090012;
